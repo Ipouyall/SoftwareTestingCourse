@@ -75,8 +75,4 @@ public class User {
         } else
             throw new CommodityIsNotInBuyList();
     }
-
-    public String getEmail() {
-        return email;
-    }
 }
