@@ -54,4 +54,35 @@ public class Comment {
         }
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public int getCommodityId() {
+        return commodityId;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public int getLike() {
+        return like;
+    }
+
+    public int getDislike() {
+        return dislike;
+    }
 }

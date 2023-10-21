@@ -76,4 +76,7 @@ public class User {
             throw new CommodityIsNotInBuyList();
     }
 
+    public String getEmail() {
+        return email;
+    }
 }
