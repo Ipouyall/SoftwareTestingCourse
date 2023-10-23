@@ -1,27 +1,40 @@
 package model;
 
-import org.junit.jupiter.api.Test;
+import exceptions.CommodityIsNotInBuyList;
+import exceptions.InsufficientCredit;
+import exceptions.InvalidCreditRange;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class UserTest {
+    public static Logger logger = Logger.getAnonymousLogger();
+
 
     public static User createAnonymousUser() {
         return new User("ali", "123", "ali.n.hodaei@gmail.com",
                 "2002-01-02 00:00:00", "Iran, Tehran");
     }
 
-    public static User createUserWithCredit(String username, String password , String email, String birthDate,
+    public static User createUserWithCredit(String username, String password, String email, String birthDate,
                                             String address, float credit) {
         User user = new User(username, password, email, birthDate, address);
         user.setCredit(credit);
         return user;
     }
-    
-    public static User createUserWithBuyItem(String username, String password , String email, String birthDate,
+
+    public static User createUserWithBuyItem(String username, String password, String email, String birthDate,
                                              String address, String id, int quantity) {
         User user = new User(username, password, email, birthDate, address);
         Map<String, Integer> buyList = new HashMap<>();
@@ -30,8 +43,8 @@ public class UserTest {
         return user;
     }
 
-    public static User createUserWithPurchasedItem(String username, String password , String email, String birthDate,
-                                             String address, String id, int quantity) {
+    public static User createUserWithPurchasedItem(String username, String password, String email, String birthDate,
+                                                   String address, String id, int quantity) {
         User user = new User(username, password, email, birthDate, address);
         Map<String, Integer> purchasedList = new HashMap<>();
         purchasedList.put(id, quantity);
@@ -39,54 +52,155 @@ public class UserTest {
         return user;
     }
 
-    @Test
-    public void addCreditWithValidCreditTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @CsvSource({"100.47f,54f", "65f,45.5f", "0f,50f", "100000f,0f", "99999f,1.25f"})
+    public void addCreditWithValidCreditTest(float initial_value, float increment) throws InvalidCreditRange {
+        // fixture setup
+        User user = createUserWithCredit("asd", "123", "adas@test.com", "2000-01-01",
+                "tehran", initial_value);
+        // execute
+        user.addCredit(increment);
+        // verify
+        float after_increment_credit = user.getCredit();
+        assertEquals(increment, after_increment_credit - initial_value);
     }
 
-    @Test
-    public void addCreditWithInvalidCreditTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @ValueSource(floats = {-45f, -10.5f, -99999, -1})
+    public void addCreditWithInvalidCreditTest(float increment) {
+        User user = createAnonymousUser();
+
+        // execute and verify
+        assertThrows(InvalidCreditRange.class, () -> {
+            user.addCredit(increment);
+        });
     }
 
-    @Test
-    public void WithdrawCreditWithValidCreditTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @CsvSource({"100.47f,54f", "65f,45.5f", "50f,50f", "100000f,0f", "99999f,1.25f"})
+    public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit {
+        User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", initial_value);
+        assumeTrue(initial_value >= decrease);
+
+        user.withdrawCredit(decrease);
+
+        float after_decrease_credit = user.getCredit();
+        assertEquals(decrease, initial_value - after_decrease_credit);
     }
 
-    @Test
-    public void WithdrawCreditWithInvalidCreditTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @CsvSource({"25.5f,54f", "64f,145.5f", "0f,50f", "100000f,9999999f", "99999f,99999.1f"})
+    public void withdrawCreditWithInvalidCreditTest(float initial_value, float decrease) {
+        User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", initial_value);
+        assumeTrue(initial_value < decrease);
+
+        assertThrows(InsufficientCredit.class, () -> {
+            user.withdrawCredit(decrease);
+        });
     }
 
-    @Test
-    public void addBuyItemNewItemTest() {
-        fail("Incomplete test.");
+    @RepeatedTest(5)
+    public void addBuyItemNewItemTest(RepetitionInfo repetitionInfo) {
+        User user = createAnonymousUser();
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+
+        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
+                ": commodity_id = " + commodity_id);
+
+        user.addBuyItem(commodity);
+
+        Map<String, Integer> userBuyList = user.getBuyList();
+        assertEquals(1, userBuyList.get(commodity_id));
     }
 
-    @Test
-    public void addBuyItemExistItemTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @ValueSource(ints = {778, 1, 99999, 0})
+    public void addBuyItemExistItemTest(int quantity) {
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+        User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", commodity_id, quantity);
+        logger.log(Level.INFO, "quantity = " + quantity + ", commodity_id = " + commodity_id);
+
+        user.addBuyItem(commodity);
+
+        assertEquals(quantity + 1, user.getBuyList().get(commodity_id));
     }
 
-    @Test
-    public void addPurchasedItemNewItemTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @ValueSource(ints = {547, 1, 99999, 100, 1402, -10})
+    public void addPurchasedItemNewItemTest(int quantity) {
+        String id = RandomStringUtils.randomAlphanumeric(10);
+        User user = createAnonymousUser();
+        logger.log(Level.INFO, "quantity = " + quantity + ", id = " + id);
+
+        user.addPurchasedItem(id, quantity);
+
+        assertEquals(quantity, user.getPurchasedList().get(id));
     }
 
-    @Test
-    public void addPurchasedItemExistItemTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @CsvSource({"421,700", "1,1000", "0,10", "99999,99999", "5000,429", "440,-7"})
+    public void addPurchasedItemExistItemTest(int initial_quantity, int increment_quantity) {
+        String id = RandomStringUtils.randomAlphanumeric(10);
+        User user = createUserWithPurchasedItem("test", "123", "adas@test.com",
+                "2000-01-01", "tehran", id, initial_quantity);
+        logger.log(Level.INFO, "initial_quantity = " + initial_quantity +
+                ", increment_quantity = " + increment_quantity + ", id = " + id);
+
+        user.addPurchasedItem(id, increment_quantity);
+
+        assertEquals(initial_quantity + increment_quantity, user.getPurchasedList().get(id));
     }
 
-    @Test
-    public void removeItemFromBuyListNewItemTest() {
-        fail("Incomplete test.");
+    @RepeatedTest(5)
+    public void removeItemFromBuyListNewItemTest(RepetitionInfo repetitionInfo) {
+        User user = createAnonymousUser();
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+
+        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
+                ": commodity_id = " + commodity_id);
+
+        assertThrows(CommodityIsNotInBuyList.class, () -> {
+            user.removeItemFromBuyList(commodity);
+        });
     }
 
-    @Test
-    public void removeItemFromBuyListExistItemTest() {
-        fail("Incomplete test.");
+    @ParameterizedTest
+    @ValueSource(ints = {123, 2, 99999, 100, 1402})
+    public void removeItemFromBuyListExistItemNot1QuantityTest(int quantity) throws CommodityIsNotInBuyList {
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+        User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", commodity_id, quantity);
+        logger.log(Level.INFO, "quantity = " + quantity + ", commodity_id = " + commodity_id);
+
+        user.removeItemFromBuyList(commodity);
+
+        assertEquals(quantity - 1, user.getBuyList().get(commodity_id));
+    }
+
+    @RepeatedTest(5)
+    public void removeItemFromBuyListExistItemWithQuantity1Test(RepetitionInfo repetitionInfo) throws CommodityIsNotInBuyList {
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+        User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", commodity_id, 1);
+        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
+                ", quantity = " + 1 + ", commodity_id = " + commodity_id);
+
+        user.removeItemFromBuyList(commodity);
+
+        assertFalse(user.getBuyList().containsKey(commodity_id));
     }
 
 
