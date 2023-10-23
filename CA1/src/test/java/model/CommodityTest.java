@@ -29,6 +29,7 @@ public class CommodityTest {
     public void testUpdateInStockValidAmount() throws NotInStock {
         int amount = -5;
         commodity.updateInStock(amount);
+
         assertEquals(5, commodity.getInStock());
     }
 
@@ -36,6 +37,7 @@ public class CommodityTest {
     @DisplayName("Test updateInStock method with invalid amount")
     public void testUpdateInStockInvalidAmount() {
         int amount = -15;
+
         assertThrows(NotInStock.class, () -> commodity.updateInStock(amount));
     }
 
@@ -49,7 +51,9 @@ public class CommodityTest {
     @DisplayName("Test addRate method with single user")
     public void testAddRateSingleUser(String username, int score) {
         commodity.addRate(username, score);
+
         float expectedRating = (initRate + score) / 2;
+
         assertEquals(expectedRating, commodity.getRating(), 0.01);
     }
 
@@ -57,6 +61,7 @@ public class CommodityTest {
     @DisplayName("Test calcRating method with one rating")
     public void testCalcRatingOneRating() {
         commodity.addRate("Alice", 4);
+
         assertEquals(3.5, commodity.getRating(), 0.01);
     }
 
@@ -65,6 +70,7 @@ public class CommodityTest {
     public void testCalcRatingOneRatingReWritten() {
         commodity.addRate("Alice", 4);
         commodity.addRate("Alice", 5);
+
         assertEquals(4, commodity.getRating(), 0.01);
     }
 
@@ -74,6 +80,9 @@ public class CommodityTest {
         commodity.addRate("Alice", 4);
         commodity.addRate("Bob", 5);
         commodity.addRate("Charlie", 2);
-        assertEquals(3.5, commodity.getRating(), 0.001);
+
+        float expectedTaring = (4 + 5 + 2 + initRate) / 4;
+
+        assertEquals(expectedTaring, commodity.getRating(), 0.001);
     }
 }
