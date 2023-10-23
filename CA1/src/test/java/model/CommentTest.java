@@ -1,5 +1,6 @@
 package model;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,20 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CommentTest {
 
     private Comment comment;
-    private int id;
-    private String email;
-    private String name;
-    private int cId;
-    private String content;
+    private final int id = 1;
+    private final String email = "user@example.com";
+    private final String name = "John";;
+    private final int cId = 123;
+    private final String content = "Sample comment";
 
     @BeforeEach
-    public void setUp() {
-        id = 1;
-        email = "user@example.com";
-        name = "John";
-        cId = 123;
-        content = "Sample comment";
-
+    public void setUpTest() {
         comment = new Comment(id, email, name, cId, content);
     }
 
@@ -69,7 +64,6 @@ public class CommentTest {
         assertEquals(content, actualContent);
     }
 
-
     @Test
     public void testDateNotNull() {
         String currentDate = comment.getDate();
@@ -94,7 +88,7 @@ public class CommentTest {
             "like, 1, 0",
             "dislike, 0, 1",
     })
-    @DisplayName("Test addUserVote method")
+    @DisplayName("Test addUserVote method for Single Vote from Single User")
     public void testAddUserVote(String vote, int expectedLikes, int expectedDislikes) {
         // Execute
         comment.addUserVote("Alice", vote);
@@ -113,7 +107,7 @@ public class CommentTest {
             "Ali Adam Alice, like dislike like, 2, 1",
             "Ali Adam Alice, dislike like dislike, 1, 2",
     })
-    @DisplayName("Test addUserVote method for many votes from different users")
+    @DisplayName("Test addUserVote method for Multiple Votes from Multiple Different Users")
     public void testAddUserVotesDifferentUser(String names, String votes, int expectedLikes, int expectedDislikes) {
         // Convert names and votes to lists
         List<String> nameList = Arrays.asList(names.split("\\s+"));
@@ -139,7 +133,7 @@ public class CommentTest {
             "Alice, like dislike, 0, 1",
             "Alice, dislike like, 1, 0",
     })
-    @DisplayName("Test addUserVote method for many votes from same user")
+    @DisplayName("Test addUserVote method for Multiple Votes from Single Same User")
     public void testAddUserVotesSameUser(String name, String votes, int expectedLikes, int expectedDislikes) {
         // Convert votes to lists
         String[] voteList = votes.split("\\s+");
