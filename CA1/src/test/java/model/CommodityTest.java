@@ -38,7 +38,8 @@ public class CommodityTest {
     public void testUpdateInStockInvalidAmount() {
         int amount = -15;
 
-        assertThrows(NotInStock.class, () -> commodity.updateInStock(amount));
+        NotInStock exception = assertThrows(NotInStock.class, () -> commodity.updateInStock(amount));
+        assertEquals("Commodity is not in stock.", exception.getMessage());
     }
 
     @ParameterizedTest
@@ -62,7 +63,8 @@ public class CommodityTest {
     })
     @DisplayName("Test addRate method for Single User Invalid Score out of range")
     public void testAddRateSingleOutRange(String username, int score) {
-        assertThrows(IllegalArgumentException.class, () -> commodity.addRate(username, score));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> commodity.addRate(username, score));
+        assertEquals("Invalid score, Score must be between 1 and 10", exception.getMessage());
     }
 
     @ParameterizedTest

@@ -31,7 +31,7 @@ public class Commodity {
 
     public void addRate(String username, int score) throws IllegalArgumentException {
         if (score < 1 || score > 10)
-            throw new IllegalArgumentException("Score must be between 1 and 10");
+            throw new IllegalArgumentException("Invalid score, Score must be between 1 and 10");
         userRate.put(username, score);
         this.calcRating();
     }
