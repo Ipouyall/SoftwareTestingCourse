@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CommodityTest {
     private Commodity commodity;
 
-    private int inStock = 10;
-    private float initRate = 3.0f;
+    private final int inStock = 10;
+    private final float initRate = 3.0f;
 
     @BeforeEach
     public void setUp() {
@@ -34,7 +34,7 @@ public class CommodityTest {
     }
 
     @Test
-    @DisplayName("Test updateInStock method with invalid amount")
+    @DisplayName("Test updateInStock method for Invalid Amount")
     public void testUpdateInStockInvalidAmount() {
         int amount = -15;
 
@@ -48,9 +48,33 @@ public class CommodityTest {
             "Charlie, 2",
             "John, 3",
     })
-    @DisplayName("Test addRate method with single user")
-    public void testAddRateSingleUser(String username, int score) {
+    @DisplayName("Test addRate method for Single User Valid Score")
+    public void testAddRateSingleUser(String username, int score) throws IllegalArgumentException {
         commodity.addRate(username, score);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "Alice, -4",
+            "Bob, 15",
+            "Charlie, 0",
+            "John, 11",
+    })
+    @DisplayName("Test addRate method for Single User Invalid Score out of range")
+    public void testAddRateSingleOutRange(String username, int score) {
+        assertThrows(IllegalArgumentException.class, () -> commodity.addRate(username, score));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "4",
+            "1",
+            "5",
+            "10",
+    })
+    @DisplayName("Test calcRating method for Single User Single Valid Rating")
+    public void testCalcRatingOneRating(int score) throws IllegalArgumentException {
+        commodity.addRate("Alice", score);
 
         float expectedRating = (initRate + score) / 2;
 
@@ -58,25 +82,19 @@ public class CommodityTest {
     }
 
     @Test
-    @DisplayName("Test calcRating method with one rating")
-    public void testCalcRatingOneRating() {
-        commodity.addRate("Alice", 4);
-
-        assertEquals(3.5, commodity.getRating(), 0.01);
-    }
-
-    @Test
     @DisplayName("Test calcRating method with one rating rewritten")
-    public void testCalcRatingOneRatingReWritten() {
+    public void testCalcRatingOneRatingReWritten() throws IllegalArgumentException {
         commodity.addRate("Alice", 4);
         commodity.addRate("Alice", 5);
 
-        assertEquals(4, commodity.getRating(), 0.01);
+        float expectedRating = (initRate + 5) / 2;
+
+        assertEquals(expectedRating, commodity.getRating(), 0.01);
     }
 
     @Test
     @DisplayName("Test calcRating method with multiple ratings")
-    public void testCalcRatingMultipleRatings() {
+    public void testCalcRatingMultipleRatings() throws IllegalArgumentException {
         commodity.addRate("Alice", 4);
         commodity.addRate("Bob", 5);
         commodity.addRate("Charlie", 2);
