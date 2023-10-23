@@ -11,9 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CommentTest {
 
@@ -88,8 +86,8 @@ public class CommentTest {
             "like, 1, 0",
             "dislike, 0, 1",
     })
-    @DisplayName("Test addUserVote method for Single Vote from Single User")
-    public void testAddUserVote(String vote, int expectedLikes, int expectedDislikes) {
+    @DisplayName("Test addUserVote method for Single Valid Vote from Single User")
+    public void testAddUserVote(String vote, int expectedLikes, int expectedDislikes) throws IllegalArgumentException {
         // Execute
         comment.addUserVote("Alice", vote);
         int actualLikes = comment.getLike();
@@ -107,8 +105,8 @@ public class CommentTest {
             "Ali Adam Alice, like dislike like, 2, 1",
             "Ali Adam Alice, dislike like dislike, 1, 2",
     })
-    @DisplayName("Test addUserVote method for Multiple Votes from Multiple Different Users")
-    public void testAddUserVotesDifferentUser(String names, String votes, int expectedLikes, int expectedDislikes) {
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Multiple Different Users")
+    public void testAddUserVotesDifferentUser(String names, String votes, int expectedLikes, int expectedDislikes) throws IllegalArgumentException {
         // Convert names and votes to lists
         List<String> nameList = Arrays.asList(names.split("\\s+"));
         List<String> voteList = Arrays.asList(votes.split("\\s+"));
@@ -133,7 +131,7 @@ public class CommentTest {
             "Alice, like dislike, 0, 1",
             "Alice, dislike like, 1, 0",
     })
-    @DisplayName("Test addUserVote method for Multiple Votes from Single Same User")
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Single Same User")
     public void testAddUserVotesSameUser(String name, String votes, int expectedLikes, int expectedDislikes) {
         // Convert votes to lists
         String[] voteList = votes.split("\\s+");
@@ -151,5 +149,22 @@ public class CommentTest {
         assertEquals(expectedDislikes, actualDislikes);
     }
 
-    // TODO: does we need to check what happen if we use sth except like/dislike?
+    @ParameterizedTest
+    @CsvSource({
+            "Like",
+            "disLike",
+            "invalid",
+            "Dislike",
+            "LIKE",
+            "DISLIKE",
+            "neutral",
+    })
+    @DisplayName("Test addUserVote method for Single Invalid Vote from Single User")
+    public void testAddUserInvalidVote(String vote) {
+        // Execute
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> comment.addUserVote("Alice", vote));
+
+        // Validate
+        assertEquals("Invalid vote type", exception.getMessage());
+    }
 }
