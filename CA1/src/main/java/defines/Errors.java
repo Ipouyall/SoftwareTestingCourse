@@ -25,5 +25,6 @@ public class Errors {
     public static final String INCORRECT_PASSWORD = "Incorrect password.";
     public static final String USERNAME_ALREADY_TAKEN = "The username is already taken.";
     public static final String INVALID_QUANTITY = "The quantity is invalid.";
+    public static final String INVALID_DECREASE_AMOUNT = "Decrease amount can not be negative.";
 
 }

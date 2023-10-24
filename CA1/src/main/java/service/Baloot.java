@@ -79,7 +79,7 @@ public class Baloot {
         return total;
     }
 
-    public void withdrawPayableAmount(User user) throws InsufficientCredit, NotInStock, InvalidQuantity {
+    public void withdrawPayableAmount(User user) throws InsufficientCredit, NotInStock, InvalidQuantity, InvalidWithdrawAmount {
         float amount = getCurrentBuyListPrice(user);
         user.withdrawCredit(amount);
 

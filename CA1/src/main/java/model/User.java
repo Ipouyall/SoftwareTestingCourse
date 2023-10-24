@@ -40,9 +40,13 @@ public class User {
         this.credit += amount;
     }
 
-    public void withdrawCredit(float amount) throws InsufficientCredit {
+    public void withdrawCredit(float amount) throws InsufficientCredit, InvalidWithdrawAmount {
         if (amount > this.credit)
             throw new InsufficientCredit();
+
+        if (amount < 0) {
+            throw new InvalidWithdrawAmount();
+        }
 
         this.credit -= amount;
     }

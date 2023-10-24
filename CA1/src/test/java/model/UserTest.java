@@ -94,7 +94,7 @@ public class UserTest {
             "50f, 50f"
     })
     @DisplayName("Test withdrawCredit with multiple initial value and valid amount to decrease")
-    public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit {
+    public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit, InvalidWithdrawAmount {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
 
@@ -102,6 +102,16 @@ public class UserTest {
 
         float after_decrease_credit = user.getCredit();
         assertEquals(decrease, initial_value - after_decrease_credit);
+    }
+
+    @Test
+    @DisplayName("Test withdrawCredit with invalid amount.")
+    public void withdrawCreditWithInValidAmountTest() throws InsufficientCredit {
+        User user = createAnonymousUser();
+
+        assertThrows(InvalidWithdrawAmount.class, () -> {
+            user.withdrawCredit(-1f);
+        });
     }
 
     @ParameterizedTest
@@ -131,6 +141,7 @@ public class UserTest {
 
         Map<String, Integer> userBuyList = user.getBuyList();
         assertEquals(1, userBuyList.get(commodity_id));
+
     }
 
     @ParameterizedTest
