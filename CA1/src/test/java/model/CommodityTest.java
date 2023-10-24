@@ -11,48 +11,75 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommodityTest {
-    private Commodity commodity;
 
-    private final int inStock = 10;
-    private final float initRate = 3.0f;
+    public static Commodity createAnonymousCommodity() {
+        Commodity commodity = new Commodity();
+        commodity.setId("123");
 
-    @BeforeEach
-    public void setUp() {
-        commodity = new Commodity();
-        commodity.setId("1234");
-        commodity.setName("Sample Commodity");
+        return commodity;
+    }
+
+    public static Commodity createAnonymousCommodityWithInStock(int inStock) {
+        Commodity commodity = createAnonymousCommodity();
         commodity.setInStock(inStock);
+
+        return commodity;
+    }
+
+    public static Commodity createAnonymousCommodityWithInitRate(int initRate) {
+        Commodity commodity = createAnonymousCommodity();
         commodity.setInitRate(initRate);
+
+        return commodity;
     }
 
     @Test
     @DisplayName("Test updateInStock method with valid amount")
     public void testUpdateInStockValidAmount() throws NotInStock {
+        // SetUp
+        Commodity commodity = createAnonymousCommodityWithInStock(10);
+
+        // Execute
         int amount = -5;
         commodity.updateInStock(amount);
 
-        assertEquals(5, commodity.getInStock());
+        // Validate
+        assertEquals(5, commodity.getInStock(), 0.001);
+
+        // Teardown -> Garbage Collector
     }
 
     @Test
     @DisplayName("Test updateInStock method for Invalid Amount")
     public void testUpdateInStockInvalidAmount() {
-        int amount = -15;
+        // SetUp
+        Commodity commodity = createAnonymousCommodityWithInStock(10);
 
-        NotInStock exception = assertThrows(NotInStock.class, () -> commodity.updateInStock(amount));
+        // Execute & Validate
+        NotInStock exception = assertThrows(NotInStock.class, () -> commodity.updateInStock(-15));
         assertEquals("Commodity is not in stock.", exception.getMessage());
+
+        // Teardown -> Garbage Collector
     }
 
     @ParameterizedTest
     @CsvSource({
-            "Alice, 4",
-            "Bob, 5",
-            "Charlie, 2",
-            "John, 3",
+            "Alice, 4, 1, 2.5",
+            "Alice, 1, 3, 2",
+            "Alice, 5, 5, 5",
     })
-    @DisplayName("Test addRate method for Single User Valid Score")
-    public void testAddRateSingleUser(String username, int score) throws IllegalArgumentException {
-        commodity.addRate(username, score);
+    @DisplayName("Test calcRating method for Single User Single Valid Rating Specified initRate")
+    public void testCalcRatingOneRating(String uname, int score, int initRate, float expectedRate) throws IllegalArgumentException {
+        // SetUp
+        Commodity commodity = createAnonymousCommodityWithInitRate(initRate);
+
+        // Execute
+        commodity.addRate(uname, score);
+
+        // Validate
+        assertEquals(expectedRate, commodity.getRating(), 0.001);
+
+        // Teardown -> Garbage Collector
     }
 
     @ParameterizedTest
@@ -64,41 +91,44 @@ public class CommodityTest {
     })
     @DisplayName("Test addRate method for Single User Invalid Score out of range")
     public void testAddRateSingleOutRange(String username, int score) {
+        // SetUp
+        Commodity commodity = createAnonymousCommodity();
+
+        // Execute & Validate
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> commodity.addRate(username, score));
         assertEquals("Invalid score, Score must be between 1 and 10", exception.getMessage());
-    }
 
-    @ParameterizedTest
-    @ValueSource(ints = {4, 1, 5, 10,})
-    @DisplayName("Test calcRating method for Single User Single Valid Rating")
-    public void testCalcRatingOneRating(int score) throws IllegalArgumentException {
-        commodity.addRate("Alice", score);
-
-        float expectedRating = (initRate + score) / 2;
-
-        assertEquals(expectedRating, commodity.getRating(), 0.01);
+        // Teardown -> Garbage Collector
     }
 
     @Test
-    @DisplayName("Test calcRating method with one rating rewritten")
-    public void testCalcRatingOneRatingReWritten() throws IllegalArgumentException {
+    @DisplayName("Test calcRating method with one rating rewritten with initRate")
+    public void testCalcRatingOneRatingReWrittenWithInitRate() throws IllegalArgumentException {
+        // SetUp
+        Commodity commodity = createAnonymousCommodityWithInitRate(3);
+
+        // Execute
         commodity.addRate("Alice", 4);
         commodity.addRate("Alice", 5);
 
-        float expectedRating = (initRate + 5) / 2;
+        // Validate
+        assertEquals(4, commodity.getRating(), 0.001);
 
-        assertEquals(expectedRating, commodity.getRating(), 0.01);
+        // Teardown -> Garbage Collector
     }
 
     @Test
-    @DisplayName("Test calcRating method with multiple ratings")
+    @DisplayName("Test calcRating method with multiple ratings with initRate")
     public void testCalcRatingMultipleRatings() throws IllegalArgumentException {
+        // SetUp
+        Commodity commodity = createAnonymousCommodityWithInitRate(3);
+
         commodity.addRate("Alice", 4);
         commodity.addRate("Bob", 5);
         commodity.addRate("Charlie", 2);
 
-        float expectedTaring = (4 + 5 + 2 + initRate) / 4;
+        assertEquals(3.5f, commodity.getRating(), 0.001);
 
-        assertEquals(expectedTaring, commodity.getRating(), 0.001);
+        // Teardown -> Garbage Collector
     }
 }
