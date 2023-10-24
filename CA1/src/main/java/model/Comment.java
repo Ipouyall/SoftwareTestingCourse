@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,11 @@ public class Comment {
         return dateFormat.format(currentDate);
     }
 
-    public void addUserVote(String userName, String vote) {
+    public void addUserVote(String userName, String vote) throws IllegalArgumentException {
+        String[] validVotes = new String[]{"like", "dislike"};
+        if (!Arrays.asList(validVotes).contains(vote))
+            throw new IllegalArgumentException("Invalid vote type");
+
         userVote.put(userName, vote);
 
         this.like = 0;
@@ -53,5 +58,4 @@ public class Comment {
                 this.dislike += 1;
         }
     }
-
 }
