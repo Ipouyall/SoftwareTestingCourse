@@ -66,7 +66,7 @@ public class BuyListController {
             return new ResponseEntity<>("commodity added to buy list successfully!", HttpStatus.OK);
         } catch (NotExistentUser | NotExistentCommodity e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (AlreadyInBuyList e) {
+        } catch (AlreadyInBuyList | NotInStock e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -90,7 +90,7 @@ public class BuyListController {
             User user = Baloot.getInstance().getUserById(username);
             Baloot.getInstance().withdrawPayableAmount(user);
             return new ResponseEntity<>("buy list purchased successfully!", HttpStatus.OK);
-        } catch (InsufficientCredit | NotExistentUser | NotInStock e) {
+        } catch (InsufficientCredit | NotExistentUser | NotInStock | InvalidQuantity e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

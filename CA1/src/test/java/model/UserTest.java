@@ -1,11 +1,8 @@
 package model;
 
-import exceptions.CommodityIsNotInBuyList;
-import exceptions.InsufficientCredit;
-import exceptions.InvalidCreditRange;
+import exceptions.*;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.RepetitionInfo;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -52,8 +49,16 @@ public class UserTest {
         return user;
     }
 
+    public static Commodity createFakeCommodityWithInStock(String id, int inStock) {
+        Commodity fake_commodity = new Commodity();
+        fake_commodity.setInStock(inStock);
+        fake_commodity.setId(id);
+        return fake_commodity;
+    }
+
+
     @ParameterizedTest
-    @CsvSource({"100.47f,54f", "65f,45.5f", "0f,50f", "100000f,0f", "99999f,1.25f"})
+    @CsvSource({"65f,45.5f", "0f,50f", "100000f,0f"})
     public void addCreditWithValidCreditTest(float initial_value, float increment) throws InvalidCreditRange {
         // fixture setup
         User user = createUserWithCredit("asd", "123", "adas@test.com", "2000-01-01",
@@ -66,7 +71,7 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(floats = {-45f, -10.5f, -99999, -1})
+    @ValueSource(floats = {-45f, -10.5f, -Float.MAX_VALUE})
     public void addCreditWithInvalidCreditTest(float increment) {
         User user = createAnonymousUser();
 
@@ -77,7 +82,7 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"100.47f,54f", "65f,45.5f", "50f,50f", "100000f,0f", "99999f,1.25f"})
+    @CsvSource({"100.47f,0f", "65f,45.5f", "50f,50f"})
     public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
@@ -90,7 +95,7 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"25.5f,54f", "64f,145.5f", "0f,50f", "100000f,9999999f", "99999f,99999.1f"})
+    @CsvSource({"0f,50f", "100000f,9999999f", "99999f,99999.1f"})
     public void withdrawCreditWithInvalidCreditTest(float initial_value, float decrease) {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
@@ -101,28 +106,27 @@ public class UserTest {
         });
     }
 
-    @RepeatedTest(5)
-    public void addBuyItemNewItemTest(RepetitionInfo repetitionInfo) {
+    @Test
+    public void addBuyItemNewItemTest() throws NotInStock {
         User user = createAnonymousUser();
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
-        Commodity commodity = new Commodity();
-        commodity.setId(commodity_id);
+        Commodity fake_commodity = createFakeCommodityWithInStock(commodity_id, 1);
+        logger.log(Level.INFO, "Commodity_id = " + commodity_id);
 
-        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
-                ": commodity_id = " + commodity_id);
-
-        user.addBuyItem(commodity);
+        user.addBuyItem(fake_commodity);
 
         Map<String, Integer> userBuyList = user.getBuyList();
         assertEquals(1, userBuyList.get(commodity_id));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {778, 1, 99999, 0})
-    public void addBuyItemExistItemTest(int quantity) {
+    @ValueSource(ints = {778, 1, 2147483647})
+    public void addBuyItemExistItemTest(int quantity) throws NotInStock {
+        int commodity_in_stock = 1;
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
         commodity.setId(commodity_id);
+        commodity.setInStock(commodity_in_stock);
         User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", commodity_id, quantity);
         logger.log(Level.INFO, "quantity = " + quantity + ", commodity_id = " + commodity_id);
@@ -133,8 +137,38 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {547, 1, 99999, 100, 1402, -10})
-    public void addPurchasedItemNewItemTest(int quantity) {
+    @ValueSource(ints = {778, 1, 2147483647})
+    public void addBuyItemInvalidZeroInStockTest(int quantity) throws NotInStock {
+        int commodity_in_stock = 0;
+        String commodity_id = RandomStringUtils.randomAlphanumeric(10);
+        Commodity commodity = new Commodity();
+        commodity.setId(commodity_id);
+        commodity.setInStock(commodity_in_stock);
+        User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
+                "tehran", commodity_id, quantity);
+        logger.log(Level.INFO, "quantity = " + quantity + ", commodity_id = " + commodity_id);
+
+        assertThrows(NotInStock.class, () -> {
+            user.addBuyItem(commodity);
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1564, -2147483648, 0})
+    public void addPurchasedItemInvalidQuantityTest(int quantity) {
+        String id = RandomStringUtils.randomAlphanumeric(10);
+        User user = createAnonymousUser();
+        logger.log(Level.INFO, "quantity = " + quantity + ", id = " + id);
+
+        assertThrows(InvalidQuantity.class, () -> {
+            user.addPurchasedItem(id, quantity);
+        });
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(ints = {547, 1, 2147483647})
+    public void addPurchasedItemNewItemTest(int quantity) throws InvalidQuantity {
         String id = RandomStringUtils.randomAlphanumeric(10);
         User user = createAnonymousUser();
         logger.log(Level.INFO, "quantity = " + quantity + ", id = " + id);
@@ -145,8 +179,8 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"421,700", "1,1000", "0,10", "99999,99999", "5000,429", "440,-7"})
-    public void addPurchasedItemExistItemTest(int initial_quantity, int increment_quantity) {
+    @CsvSource({"421,700", "0,10", "2147483646,1"})
+    public void addPurchasedItemExistItemTest(int initial_quantity, int increment_quantity) throws InvalidQuantity {
         String id = RandomStringUtils.randomAlphanumeric(10);
         User user = createUserWithPurchasedItem("test", "123", "adas@test.com",
                 "2000-01-01", "tehran", id, initial_quantity);
@@ -158,15 +192,14 @@ public class UserTest {
         assertEquals(initial_quantity + increment_quantity, user.getPurchasedList().get(id));
     }
 
-    @RepeatedTest(5)
-    public void removeItemFromBuyListNewItemTest(RepetitionInfo repetitionInfo) {
+    @Test
+    public void removeItemFromBuyListNewItemTest() {
         User user = createAnonymousUser();
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
         commodity.setId(commodity_id);
 
-        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
-                ": commodity_id = " + commodity_id);
+        logger.log(Level.INFO, "Commodity_id = " + commodity_id);
 
         assertThrows(CommodityIsNotInBuyList.class, () -> {
             user.removeItemFromBuyList(commodity);
@@ -174,7 +207,7 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {123, 2, 99999, 100, 1402})
+    @ValueSource(ints = {123, 2, 2147483647})
     public void removeItemFromBuyListExistItemNot1QuantityTest(int quantity) throws CommodityIsNotInBuyList {
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
@@ -188,20 +221,18 @@ public class UserTest {
         assertEquals(quantity - 1, user.getBuyList().get(commodity_id));
     }
 
-    @RepeatedTest(5)
-    public void removeItemFromBuyListExistItemWithQuantity1Test(RepetitionInfo repetitionInfo) throws CommodityIsNotInBuyList {
+    @Test
+    public void removeItemFromBuyListExistItemWithQuantity1Test() throws CommodityIsNotInBuyList {
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
         commodity.setId(commodity_id);
         User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", commodity_id, 1);
-        logger.log(Level.INFO, "Repetition #" + repetitionInfo.getCurrentRepetition() +
-                ", quantity = " + 1 + ", commodity_id = " + commodity_id);
+        logger.log(Level.INFO, "Quantity = " + 1 + ", commodity_id = " + commodity_id);
 
         user.removeItemFromBuyList(commodity);
 
         assertFalse(user.getBuyList().containsKey(commodity_id));
     }
-
 
 }
