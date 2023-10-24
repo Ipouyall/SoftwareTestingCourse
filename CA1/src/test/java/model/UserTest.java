@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class UserTest {
     public static Logger logger = Logger.getAnonymousLogger();
@@ -58,7 +57,7 @@ public class UserTest {
 
 
     @ParameterizedTest
-    @CsvSource({"65f,45.5f", "0f,50f", "100000f,0f"})
+    @CsvSource({"65f, 45.5f", "0f, 50f", "100000f, 0f"})
     public void addCreditWithValidCreditTest(float initial_value, float increment) throws InvalidCreditRange {
         // fixture setup
         User user = createUserWithCredit("asd", "123", "adas@test.com", "2000-01-01",
@@ -82,11 +81,10 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"100.47f,0f", "65f,45.5f", "50f,50f"})
+    @CsvSource({"100.47f, 0f", "65f, 45.5f", "50f, 50f"})
     public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
-        assumeTrue(initial_value >= decrease);
 
         user.withdrawCredit(decrease);
 
@@ -95,11 +93,10 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0f,50f", "100000f,9999999f", "99999f,99999.1f"})
+    @CsvSource({"0f, 50f", "100000f, 9999999f", "99999f, 99999.1f"})
     public void withdrawCreditWithInvalidCreditTest(float initial_value, float decrease) {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
-        assumeTrue(initial_value < decrease);
 
         assertThrows(InsufficientCredit.class, () -> {
             user.withdrawCredit(decrease);
