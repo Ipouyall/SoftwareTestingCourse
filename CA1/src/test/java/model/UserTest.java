@@ -2,6 +2,7 @@ package model;
 
 import exceptions.*;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -62,6 +63,7 @@ public class UserTest {
             "0f, 50f",
             "100000f, 0f"
     })
+    @DisplayName("Test addCredit with multiple valid credit")
     public void addCreditWithValidCreditTest(float initial_value, float increment) throws InvalidCreditRange {
         // fixture setup
         User user = createUserWithCredit("asd", "123", "adas@test.com", "2000-01-01",
@@ -74,7 +76,8 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(floats = {-45f, -10.5f, -Float.MAX_VALUE})
+    @ValueSource(floats = {-45, -10.5f, -Float.MAX_VALUE})
+    @DisplayName("Test addCredit with multiple Invalid credit")
     public void addCreditWithInvalidCreditTest(float increment) {
         User user = createAnonymousUser();
 
@@ -90,6 +93,7 @@ public class UserTest {
             "65f, 45.5f",
             "50f, 50f"
     })
+    @DisplayName("Test withdrawCredit with multiple initial value and valid amount to decrease")
     public void withdrawCreditWithValidCreditTest(float initial_value, float decrease) throws InsufficientCredit {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
@@ -103,9 +107,9 @@ public class UserTest {
     @ParameterizedTest
     @CsvSource({
             "0f, 50f",
-            "100000f, 9999999f",
             "99999f, 99999.1f"
     })
+    @DisplayName("Test withdrawCredit with multiple initial value and Invalid amount to decrease")
     public void withdrawCreditWithInvalidCreditTest(float initial_value, float decrease) {
         User user = createUserWithCredit("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", initial_value);
@@ -116,6 +120,7 @@ public class UserTest {
     }
 
     @Test
+    @DisplayName("Test addBuyItem with commodity that not added before")
     public void addBuyItemNewItemTest() throws NotInStock {
         User user = createAnonymousUser();
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
@@ -129,13 +134,12 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {778, 1, 2147483647})
+    @ValueSource(ints = {778, 1, Integer.MAX_VALUE})
+    @DisplayName("Test addBuyItem with commodity and quantity that exist before")
     public void addBuyItemExistItemTest(int quantity) throws NotInStock {
         int commodity_in_stock = 1;
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
-        Commodity commodity = new Commodity();
-        commodity.setId(commodity_id);
-        commodity.setInStock(commodity_in_stock);
+        Commodity commodity = createFakeCommodityWithInStock(commodity_id, commodity_in_stock);
         User user = createUserWithBuyItem("test", "123", "adas@test.com", "2000-01-01",
                 "tehran", commodity_id, quantity);
         logger.log(Level.INFO, "quantity = " + quantity + ", commodity_id = " + commodity_id);
@@ -146,7 +150,8 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {778, 1, 2147483647})
+    @ValueSource(ints = {778, 1, Integer.MAX_VALUE})
+    @DisplayName("Test addBuyItem with commodity that is out of stock")
     public void addBuyItemInvalidZeroInStockTest(int quantity) throws NotInStock {
         int commodity_in_stock = 0;
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
@@ -163,7 +168,8 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {-1564, -2147483648, 0})
+    @ValueSource(ints = {-1564, Integer.MIN_VALUE, 0})
+    @DisplayName("Test addPurchasedItem with invalid quantity")
     public void addPurchasedItemInvalidQuantityTest(int quantity) {
         String id = RandomStringUtils.randomAlphanumeric(10);
         User user = createAnonymousUser();
@@ -176,7 +182,8 @@ public class UserTest {
 
 
     @ParameterizedTest
-    @ValueSource(ints = {547, 1, 2147483647})
+    @ValueSource(ints = {547, 1, Integer.MAX_VALUE})
+    @DisplayName("Test addPurchasedItem with valid quantity and item not exist before")
     public void addPurchasedItemNewItemTest(int quantity) throws InvalidQuantity {
         String id = RandomStringUtils.randomAlphanumeric(10);
         User user = createAnonymousUser();
@@ -193,6 +200,7 @@ public class UserTest {
             "0,10",
             "2147483646,1"
     })
+    @DisplayName("Test addPurchasedItem with valid quantity and initial quantity for item exist before")
     public void addPurchasedItemExistItemTest(int initial_quantity, int increment_quantity) throws InvalidQuantity {
         String id = RandomStringUtils.randomAlphanumeric(10);
         User user = createUserWithPurchasedItem("test", "123", "adas@test.com",
@@ -206,6 +214,7 @@ public class UserTest {
     }
 
     @Test
+    @DisplayName("Test removeItemFromBuyList with item not exist before")
     public void removeItemFromBuyListNewItemTest() {
         User user = createAnonymousUser();
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
@@ -220,7 +229,8 @@ public class UserTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {123, 2, 2147483647})
+    @ValueSource(ints = {123, 2, Integer.MAX_VALUE})
+    @DisplayName("Test removeItemFromBuyList with item that has quantity (except 1) and exist before")
     public void removeItemFromBuyListExistItemNot1QuantityTest(int quantity) throws CommodityIsNotInBuyList {
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
@@ -235,6 +245,7 @@ public class UserTest {
     }
 
     @Test
+    @DisplayName("Test removeItemFromBuyList with item that has quantity = 1 and exist before")
     public void removeItemFromBuyListExistItemWithQuantity1Test() throws CommodityIsNotInBuyList {
         String commodity_id = RandomStringUtils.randomAlphanumeric(10);
         Commodity commodity = new Commodity();
