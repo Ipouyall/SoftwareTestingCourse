@@ -83,30 +83,43 @@ public class CommentTest {
 
     @ParameterizedTest
     @CsvSource({
-            "like, 1, 0",
-            "dislike, 0, 1",
+            "like, 1",
+            "dislike, 0",
     })
-    @DisplayName("Test addUserVote method for Single Valid Vote from Single User")
-    public void testAddUserVote(String vote, int expectedLikes, int expectedDislikes) throws IllegalArgumentException {
+    @DisplayName("Test addUserVote method for Single Valid Vote from Single User for like count")
+    public void testAddUserVoteLike(String vote, int expectedLikes) throws IllegalArgumentException {
         // Execute
         comment.addUserVote("Alice", vote);
         int actualLikes = comment.getLike();
-        int actualDislikes = comment.getDislike();
 
         // Validate
         assertEquals(expectedLikes, actualLikes);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "like, 0",
+            "dislike, 1",
+    })
+    @DisplayName("Test addUserVote method for Single Valid Vote from Single User for dislike count")
+    public void testAddUserVoteDislike(String vote, int expectedDislikes) throws IllegalArgumentException {
+        // Execute
+        comment.addUserVote("Alice", vote);
+        int actualDislikes = comment.getDislike();
+
+        // Validate
         assertEquals(expectedDislikes, actualDislikes);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "Ali Adam Alice, like like like, 3, 0",
-            "Ali Adam Alice, dislike dislike dislike, 0, 3",
-            "Ali Adam Alice, like dislike like, 2, 1",
-            "Ali Adam Alice, dislike like dislike, 1, 2",
+            "Ali Adam Alice, like like like, 3",
+            "Ali Adam Alice, dislike dislike dislike, 0",
+            "Ali Adam Alice, like dislike like, 2",
+            "Ali Adam Alice, dislike like dislike, 1",
     })
-    @DisplayName("Test addUserVote method for Multiple Valid Votes from Multiple Different Users")
-    public void testAddUserVotesDifferentUser(String names, String votes, int expectedLikes, int expectedDislikes) throws IllegalArgumentException {
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Multiple Different Users for like count")
+    public void testAddUserVotesDifferentUserLike(String names, String votes, int expectedLikes) throws IllegalArgumentException {
         // Convert names and votes to lists
         List<String> nameList = Arrays.asList(names.split("\\s+"));
         List<String> voteList = Arrays.asList(votes.split("\\s+"));
@@ -117,22 +130,44 @@ public class CommentTest {
         }
 
         int actualLikes = comment.getLike();
-        int actualDislikes = comment.getDislike();
 
         // Validate
         assertEquals(expectedLikes, actualLikes);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "Ali Adam Alice, like like like, 0",
+            "Ali Adam Alice, dislike dislike dislike, 3",
+            "Ali Adam Alice, like dislike like, 1",
+            "Ali Adam Alice, dislike like dislike, 2",
+    })
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Multiple Different Users for dislike count")
+    public void testAddUserVotesDifferentUserDislike(String names, String votes, int expectedDislikes) throws IllegalArgumentException {
+        // Convert names and votes to lists
+        List<String> nameList = Arrays.asList(names.split("\\s+"));
+        List<String> voteList = Arrays.asList(votes.split("\\s+"));
+
+        // Execute
+        for (int i = 0; i < nameList.size(); i++) {
+            comment.addUserVote(nameList.get(i), voteList.get(i));
+        }
+
+        int actualDislikes = comment.getDislike();
+
+        // Validate
         assertEquals(expectedDislikes, actualDislikes);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "Alice, like like like, 1, 0",
-            "Alice, dislike dislike dislike, 0, 1",
-            "Alice, like dislike, 0, 1",
-            "Alice, dislike like, 1, 0",
+            "Alice, like like like, 1",
+            "Alice, dislike dislike dislike, 0",
+            "Alice, like dislike, 0",
+            "Alice, dislike like, 1",
     })
-    @DisplayName("Test addUserVote method for Multiple Valid Votes from Single Same User")
-    public void testAddUserVotesSameUser(String name, String votes, int expectedLikes, int expectedDislikes) {
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Single Same User for like count")
+    public void testAddUserVotesSameUserLike(String name, String votes, int expectedLikes) {
         // Convert votes to lists
         String[] voteList = votes.split("\\s+");
 
@@ -142,10 +177,31 @@ public class CommentTest {
         }
 
         int actualLikes = comment.getLike();
-        int actualDislikes = comment.getDislike();
 
         // Validate
         assertEquals(expectedLikes, actualLikes);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "Alice, like like like, 0",
+            "Alice, dislike dislike dislike, 1",
+            "Alice, like dislike, 1",
+            "Alice, dislike like, 0",
+    })
+    @DisplayName("Test addUserVote method for Multiple Valid Votes from Single Same User for dislike count")
+    public void testAddUserVotesSameUserDislike(String name, String votes, int expectedDislikes) {
+        // Convert votes to lists
+        String[] voteList = votes.split("\\s+");
+
+        // Execute
+        for (String s : voteList) {
+            comment.addUserVote(name, s);
+        }
+
+        int actualDislikes = comment.getDislike();
+
+        // Validate
         assertEquals(expectedDislikes, actualDislikes);
     }
 
@@ -161,10 +217,9 @@ public class CommentTest {
     })
     @DisplayName("Test addUserVote method for Single Invalid Vote from Single User")
     public void testAddUserInvalidVote(String vote) {
-        // Execute
+        // Execute & Validate
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> comment.addUserVote("Alice", vote));
 
-        // Validate
         assertEquals("Invalid vote type", exception.getMessage());
     }
 }
