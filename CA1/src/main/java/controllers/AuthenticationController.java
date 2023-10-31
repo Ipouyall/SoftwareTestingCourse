@@ -1,5 +1,7 @@
 package controllers;
 
+import exceptions.InvalidRequestFormat;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import service.Baloot;
 import model.User;
 import exceptions.IncorrectPassword;
@@ -23,6 +25,9 @@ public class AuthenticationController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<String> login(@RequestBody Map<String, String> input) {
+        if(!input.containsKey("username") || !input.containsKey("password")){
+            return new ResponseEntity<>((new InvalidRequestFormat()).getMessage(), HttpStatus.BAD_REQUEST);
+        }
         try {
             String username = input.get("username");
             String password = input.get("password");
@@ -37,6 +42,14 @@ public class AuthenticationController {
 
     @PostMapping(value = "/signup")
     public ResponseEntity<String> signup(@RequestBody Map<String, String> input) {
+        if (!input.containsKey("address")
+                || !input.containsKey("birthDate")
+                || !input.containsKey("email")
+                || !input.containsKey("username")
+                || !input.containsKey("password")
+        ){
+            return new ResponseEntity<>((new InvalidRequestFormat()).getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
         String address = input.get("address");
         String birthDate = input.get("birthDate");

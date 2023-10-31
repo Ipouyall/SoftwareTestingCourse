@@ -60,20 +60,28 @@ public class CommoditiesController {
         User user = null;
         try {
             user = baloot.getUserById(username);
-        } catch (NotExistentUser ignored) {
+            Comment comment = new Comment(commentId, user.getEmail(), user.getUsername(), Integer.parseInt(id), commentText);
+            baloot.addComment(comment);
+
+            return new ResponseEntity<>("comment added successfully!", HttpStatus.OK);
+        } catch (NotExistentUser e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        Comment comment = new Comment(commentId, user.getEmail(), user.getUsername(), Integer.parseInt(id), commentText);
-        baloot.addComment(comment);
 
-        return new ResponseEntity<>("comment added successfully!", HttpStatus.OK);
     }
 
     @GetMapping(value = "/commodities/{id}/comment")
     public ResponseEntity<ArrayList<Comment>> getCommodityComment(@PathVariable String id) {
-        ArrayList<Comment> comments = baloot.getCommentsForCommodity(Integer.parseInt(id));
+        try {
+            ArrayList<Comment> comments = baloot.getCommentsForCommodity(Integer.parseInt(id));
 
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+            return new ResponseEntity<>(comments, HttpStatus.OK);
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping(value = "/commodities/search")
