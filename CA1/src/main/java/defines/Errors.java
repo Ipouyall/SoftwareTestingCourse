@@ -26,5 +26,5 @@ public class Errors {
     public static final String USERNAME_ALREADY_TAKEN = "The username is already taken.";
     public static final String INVALID_QUANTITY = "The quantity is invalid.";
     public static final String INVALID_DECREASE_AMOUNT = "Decrease amount can not be negative.";
-
+    public static final String INVALID_REQUEST_FORMAT = "Invalid format for request. you should provide all necessary fields.";
 }
