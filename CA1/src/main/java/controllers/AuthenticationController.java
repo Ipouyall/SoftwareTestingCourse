@@ -43,10 +43,10 @@ public class AuthenticationController {
     @PostMapping(value = "/signup")
     public ResponseEntity<String> signup(@RequestBody Map<String, String> input) {
         if (!input.containsKey("address")
-                || input.containsKey("birthDate")
-                || input.containsKey("email")
-                || input.containsKey("username")
-                || input.containsKey("password")
+                || !input.containsKey("birthDate")
+                || !input.containsKey("email")
+                || !input.containsKey("username")
+                || !input.containsKey("password")
         ){
             return new ResponseEntity<>((new InvalidRequestFormat()).getMessage(), HttpStatus.BAD_REQUEST);
         }

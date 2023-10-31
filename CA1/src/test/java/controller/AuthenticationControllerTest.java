@@ -3,10 +3,13 @@ package controller;
 import controllers.AuthenticationController;
 import exceptions.InvalidRequestFormat;
 import exceptions.UsernameAlreadyTaken;
+import model.Comment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import service.Baloot;
 import model.User;
@@ -37,6 +40,9 @@ public class AuthenticationControllerTest {
 
     @InjectMocks
     private AuthenticationController authenticationController;
+
+    @Captor
+    private ArgumentCaptor<User> userArgumentCaptor;
 
     public static User createAnonymousUser(){
         String username = "john";
@@ -150,6 +156,14 @@ public class AuthenticationControllerTest {
         assertEquals("signup successfully!", response.getBody());
         verify(baloot, times(1)).addUser(any(User.class));
 
+        verify(baloot).addUser(userArgumentCaptor.capture());
+        User genUser = userArgumentCaptor.getValue();
+        assertEquals(user.getUsername(), genUser.getUsername());
+        assertEquals(user.getPassword(), genUser.getPassword());
+        assertEquals(user.getEmail(), genUser.getEmail());
+        assertEquals(user.getBirthDate(), genUser.getBirthDate());
+        assertEquals(user.getAddress(), genUser.getAddress());
+
         // Tear-down
     }
 
@@ -179,6 +193,14 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(USERNAME_ALREADY_TAKEN, response.getBody());
         verify(baloot, times(1)).addUser(any(User.class));
+
+        verify(baloot).addUser(userArgumentCaptor.capture());
+        User genUser = userArgumentCaptor.getValue();
+        assertEquals(user.getUsername(), genUser.getUsername());
+        assertEquals(user.getPassword(), genUser.getPassword());
+        assertEquals(user.getEmail(), genUser.getEmail());
+        assertEquals(user.getBirthDate(), genUser.getBirthDate());
+        assertEquals(user.getAddress(), genUser.getAddress());
 
         // Tear-down
     }

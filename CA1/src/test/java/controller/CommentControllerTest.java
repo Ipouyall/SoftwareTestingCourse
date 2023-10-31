@@ -87,7 +87,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void testDislikeCommentSuccess() throws Exception { ///////////
+    public void testDislikeCommentSuccess() throws Exception {
         // Initiate values
         int commentId = 1;
         String username = "user1";
