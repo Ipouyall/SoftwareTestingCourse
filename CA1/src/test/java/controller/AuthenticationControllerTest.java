@@ -55,7 +55,7 @@ public class AuthenticationControllerTest {
     }
 
     @Test
-    public void testLoginSuccessful() throws Exception {
+    public void testLoginSuccess() throws Exception {
         // Initiate values
         User user = createAnonymousUser();
         String username = user.getUsername();
@@ -72,10 +72,12 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("login successfully!", response.getBody());
         verify(baloot).login(username, password);
+
+        // Tear-down
     }
 
     @Test
-    public void testLoginFailureNotExistentUser() throws NotExistentUser, IncorrectPassword {
+    public void testLoginFailNotExistentUser() throws NotExistentUser, IncorrectPassword {
         User user = createAnonymousUser();
         String username = user.getUsername();
         String password = user.getPassword();
@@ -94,10 +96,12 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(NOT_EXISTENT_USER, response.getBody());
         verify(baloot, times(1)).login(username, password);
+
+        // Tear-down
     }
 
     @Test
-    public void testLoginFailureIncorrectPassword() throws Exception {
+    public void testLoginFailIncorrectPassword() throws Exception {
         // Initiate values
         User user = createAnonymousUser();
         String username = user.getUsername();
@@ -117,10 +121,12 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals(INCORRECT_PASSWORD, response.getBody());
         verify(baloot, times(1)).login(username, password);
+
+        // Tear-down
     }
 
     @Test
-    public void testSignupSuccessful() throws Exception {
+    public void testSignupSuccess() throws Exception {
         // Initiate values
         User user = createAnonymousUser();
         String username = user.getUsername();
@@ -143,10 +149,12 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("signup successfully!", response.getBody());
         verify(baloot, times(1)).addUser(any(User.class));
+
+        // Tear-down
     }
 
     @Test
-    public void testSignupFailureUsernameAlreadyTaken() throws Exception {
+    public void testSignupFailUsernameAlreadyTaken() throws Exception {
         // Initiate values
         User user = createAnonymousUser();
         String username = user.getUsername();
@@ -171,6 +179,8 @@ public class AuthenticationControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(USERNAME_ALREADY_TAKEN, response.getBody());
         verify(baloot, times(1)).addUser(any(User.class));
+
+        // Tear-down
     }
 
     @Nested
@@ -178,7 +188,7 @@ public class AuthenticationControllerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"password", "username"})
-        public void testLoginFailureUsernameNotProvided(String removed) throws Exception {
+        public void testLoginFailSomethingNotProvided(String removed) throws Exception {
             // Initiate values
             User user = createAnonymousUser();
             String username = user.getUsername();
@@ -197,11 +207,13 @@ public class AuthenticationControllerTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertEquals(INVALID_REQUEST_FORMAT, response.getBody());
             verify(baloot, times(0)).login(any(), any());
+
+            // Tear-down
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"password", "username", "email", "birthDate", "address"})
-        public void testSignupUsernameAlreadyTaken(String removed) throws Exception {
+        public void testSignupFailSomethingNotProvided(String removed) throws Exception {
             // Initiate values
             User user = createAnonymousUser();
             String username = user.getUsername();
@@ -229,6 +241,8 @@ public class AuthenticationControllerTest {
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertEquals(INVALID_REQUEST_FORMAT, response.getBody());
             verify(baloot, times(0)).addUser(any());
+
+            // Tear-down
         }
     }
 }
