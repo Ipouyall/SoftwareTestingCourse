@@ -205,4 +205,12 @@ public class EngineTest {
                 engine.addOrderAndGetFraudulentQuantity(argumanOrder));
     }
 
+    @Test
+    @DisplayName("Test getCustomerFraudulentQuantity with empty orderHistory")
+    public void addOrderAndGetFraudulentQuantityEmptyOrderHistoryTest() {
+        int quantity = 100;
+        Order argumanOrder = creatOrder(2, 1, 100, 0);
+        Assertions.assertEquals(0, engine.addOrderAndGetFraudulentQuantity(argumanOrder));
+    }
+
 }
