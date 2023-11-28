@@ -66,22 +66,6 @@ public class CommoditiesControllerAPITest {
         return new Comment(1, "test@gmail.com", "test", 1, "this is comment");
     }
 
-//    @Test
-//    public void getCommoditiesTestd() {
-//        ArrayList<Commodity> commoditiesFake = new ArrayList<>();
-//        commoditiesFake.add(createFakeCommodity());
-//
-//        when(baloot.getCommodities()).thenReturn(commoditiesFake);
-//        ResponseEntity<ArrayList<Commodity>> response = commoditiesController.getCommodities();
-//
-//        verify(baloot, times(1)).getCommodities();
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals(response.getBody().size(), commoditiesFake.size());
-//        assertEquals(response.getBody().get(0).getId(), commoditiesFake.get(0).getId());
-//        assertEquals(response.getBody().get(0).getName(), commoditiesFake.get(0).getName());
-//    }
-
     @Test
     public void getCommoditiesTest() throws Exception {
         ArrayList<Commodity> commoditiesFake = new ArrayList<>();
