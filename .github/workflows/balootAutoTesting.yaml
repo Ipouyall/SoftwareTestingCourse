@@ -1,0 +1,22 @@
+name: Test Baloot Project
+run-name: ${{ github.actor }} - ${{ github.event_name }}
+
+on:
+  push:
+    paths:
+      - 'CA1/**'
+      - '.github/workflows/balootAutoTesting.yaml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '19'
+      - name: Run Automated Tests
+        run: cd CA1; mvn -B package --file pom.xml
