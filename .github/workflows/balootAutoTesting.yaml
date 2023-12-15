@@ -19,4 +19,4 @@ jobs:
           distribution: 'adopt'
           java-version: '19'
       - name: Run Automated Tests
-        run: cd CA1; mvn -B package --file pom.xml
+        run: cd CA1; mvn -B package --file pom.xml; echo "Tests finished!"
