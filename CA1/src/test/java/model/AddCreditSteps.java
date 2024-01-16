@@ -11,7 +11,7 @@ public class AddCreditSteps {
     private Exception exception;
     private User user;
 
-    // Helper method to create an anonymous user
+    //  method to create an anonymous user
     public static User createAnonymousUser() {
         return new User("pouya", "123", "pouya.sadeghi@mail.com",
                 "2002-01-02 00:00:00", "Iran, Tehran");
