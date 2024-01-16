@@ -1,6 +1,7 @@
 package model;
 
 import exceptions.CommodityIsNotInBuyList;
+import exceptions.NotInStock;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,7 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RemoveItemFromBuyListSteps {
+public class RemoveItemFromBuyList {
     private Commodity commodity;
     private Exception exception;
     private User user;
@@ -23,7 +24,11 @@ public class RemoveItemFromBuyListSteps {
             for (int i = 0; i < quantity; i++) {
                 Commodity commodity = new Commodity();
                 commodity.setId(commodityId);
-                user.addBuyItem(commodity);
+                try {
+                    user.addBuyItem(commodity);
+                } catch (NotInStock e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -31,7 +36,10 @@ public class RemoveItemFromBuyListSteps {
 
     @When("the user removes product with id {string} from the buy list")
     public void userRemovesFromBuyList(String commodityId) {
-        this.commodity = new Commodity(commodityId, "Product", 10.0); // Assuming default values
+        this.commodity = new Commodity(); // Assuming default values
+        commodity.setId(commodityId);
+        commodity.setPrice(10);
+        commodity.setName("P");
         try {
             user.removeItemFromBuyList(commodity);
         } catch (CommodityIsNotInBuyList e) {
