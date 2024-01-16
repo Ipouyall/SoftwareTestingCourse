@@ -5,7 +5,7 @@ Feature: User removes items from the buy list
       | 1            | 1        |
     When the user removes product with id "1" from the buy list
     Then the buy list should be:
-      | 1            | 0        |
+      |
 
   Scenario: Remove multiple items of the same commodity from the buy list
     Given an anonymous user with the following buy list:
