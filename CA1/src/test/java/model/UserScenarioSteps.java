@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MyCucumberSteps {
+public class UserScenarioSteps {
     private Commodity commodity;
     private Exception exception;
     private User user;
