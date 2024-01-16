@@ -5,55 +5,48 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RemoveItemFromBuyListSteps {
+    private Commodity commodity;
     private Exception exception;
-    private ShoppingCart shoppingCart;
+    private User user;
 
-    // method to create a shopping cart with initial buy list
-    public static ShoppingCart createShoppingCartWithBuyList() {
-        ShoppingCart cart = new ShoppingCart();
-        Commodity commodity1 = new Commodity("1", "Product A", 10.0);
-        Commodity commodity2 = new Commodity("2", "Product B", 15.0);
-        cart.addItemToBuyList(commodity1, 2);
-        cart.addItemToBuyList(commodity2, 3);
-        return cart;
-    }
-
-    @Given("a shopping cart with the following buy list:")
-    public void shoppingCartWithBuyList(String dataTable) {
-        shoppingCart = new ShoppingCart();
-        dataTable.asLists().forEach(row -> {
+    @Given("an anonymous user with the following buy list:")
+    public void anonymousUserWithBuyList(List<List<String>> buyListData) {
+        user = new User("username", "password", "email", "birthDate", "address");
+        buyListData.forEach(row -> {
             String commodityId = row.get(0);
             int quantity = Integer.parseInt(row.get(1));
-            String commodityName = row.get(2);
-            double commodityPrice = Double.parseDouble(row.get(3));
-            Commodity commodity = new Commodity(commodityId, commodityName, commodityPrice);
-            shoppingCart.addItemToBuyList(commodity, quantity);
+            for (int i = 0; i < quantity; i++) {
+                Commodity commodity = new Commodity();
+                commodity.setId(commodityId);
+                user.addBuyItem(commodity);
+            }
         });
     }
 
 
-    @When("the user removes {int} {string} from the buy list")
-    public void userRemovesFromBuyList(int quantity, String commodityId) {
+    @When("the user removes product with id {string} from the buy list")
+    public void userRemovesFromBuyList(String commodityId) {
+        this.commodity = new Commodity(commodityId, "Product", 10.0); // Assuming default values
         try {
-            Commodity commodity = new Commodity(commodityId, "Product", 10.0);
-            shoppingCart.removeItemFromBuyList(commodity, quantity);
+            user.removeItemFromBuyList(commodity);
         } catch (CommodityIsNotInBuyList e) {
             this.exception = e;
         } catch (Exception e) {
-            fail();
+            fail("Unexpected exception: " + e.getMessage());
         }
     }
 
-
     @Then("the buy list should be:")
-    public void buyListShouldBe(String dataTable) {
-        dataTable.asLists().forEach(row -> {
+    public void buyListShouldBe(List<List<String>> expectedBuyList) {
+        expectedBuyList.forEach(row -> {
             String commodityId = row.get(0);
             int expectedQuantity = Integer.parseInt(row.get(1));
-            assertEquals(expectedQuantity, shoppingCart.getBuyList().getOrDefault(commodityId, 0));
+            assertEquals(expectedQuantity, user.getBuyList().getOrDefault(commodityId, 0));
         });
     }
 

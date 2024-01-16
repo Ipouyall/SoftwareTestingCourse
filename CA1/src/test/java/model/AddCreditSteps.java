@@ -23,8 +23,8 @@ public class AddCreditSteps {
         user.setCredit(initialCredit);
     }
 
-    @When("the user adds {float} to their credit")
-    public void userAddsToCredit(float amount) {
+    @When("the user adds {float} to their current credit balance")
+    public void userAddsToCurrentCreditBalance(float amount) {
         try {
             user.addCredit(amount);
         } catch (Exception e) {
